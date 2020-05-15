@@ -2,7 +2,7 @@
 
 
 #include "FPGA_shim.hpp"
-#include "MyNetProto.hpp"
+#include "myNetProto.hpp"
 
 
 class SYSC_FPGA_hndl : public FPGA_hndl
@@ -21,6 +21,7 @@ class SYSC_FPGA_hndl : public FPGA_hndl
         int waitComplete();
         int sendComplete();
         int getOutput(Accel_Payload* pyld);
-        
+        int sendOutput(Accel_Payload* pyld);
+
         int m_socket;
 };
