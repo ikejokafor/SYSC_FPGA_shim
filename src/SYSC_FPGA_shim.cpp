@@ -219,7 +219,7 @@ int SYSC_FPGA_hndl::getOutput(Accel_Payload* pyld)
 	cout << "Software sent ACCEL_BGN_OUTPUT" << endl;
 
 	hdr.msgType = NULL_MSG;
-	hdr.length = sizeof(double) * 2;
+	hdr.length = pyld->m_size;
 	hdr.pyld = true;
 	wait_message(m_socket, &hdr, (uint8_t*)pyld->m_address, ACCEL_OUTPUT_PYLD);
 	cout << "Software recvd ACCEL_OUTPUT_PYLD" << endl;
@@ -243,7 +243,7 @@ int SYSC_FPGA_hndl::sendOutput(Accel_Payload* pyld)
 	cout << "Hardware recvd ACCEL_BGN_OUTPUT" << endl;
 
 	hdr.msgType = ACCEL_OUTPUT_PYLD;
-	hdr.length = sizeof(double) * 2;
+	hdr.length = pyld->m_size;
 	hdr.pyld = true;
 	send_message(m_socket, &hdr, (uint8_t*)pyld->m_address);
 	cout << "Hardware sent ACCEL_OUTPUT_PYLD" << endl;
