@@ -2,9 +2,9 @@
 using namespace std;
 
 
-SYSC_FPGA_hndl::SYSC_FPGA_hndl() : FPGA_hndl()
+SYSC_FPGA_hndl::SYSC_FPGA_hndl(int memStartOft) : FPGA_hndl()
 {
-
+    m_remAddrOfst = memStartOft;
 }
 
 
@@ -46,6 +46,31 @@ int SYSC_FPGA_hndl::software_init()
 }
 
 
+uint64_t SYSC_FPGA_hndl::allocate(Accel_Payload* pyld, int size)
+{
+    uint64_t aligned_sz = ALGN_PYLD_SZ(size, DMA_BUFFER_ALIGNMENT);
+    if(my_aligned_malloc((void**)&pyld->m_buffer, DMA_BUFFER_ALIGNMENT, aligned_sz))
+    {
+        printf("Failed to allocate 0x%X B for DMA buffer.", size);
+        return -1;
+    }
+    printf("Allocoated %ud bytes buffer space on Remote Memory\n", aligned_sz);
+    pyld->m_size            = aligned_sz;
+    pyld->m_remAddress      = (uint64_t)m_remAddrOfst;
+    m_remAddrOfst           += aligned_sz;
+    return                  (uint64_t)pyld->m_buffer;
+}
+
+
+void SYSC_FPGA_hndl::deallocate(Accel_Payload* pyld)
+{
+    my_aligned_free(pyld->m_buffer);
+    pyld->m_buffer          = NULL;
+    pyld->m_size            = -1;
+    pyld->m_remAddress      = -1;
+}
+
+
 uint64_t SYSC_FPGA_hndl::waitConfig()
 {
 	msgHeader_t hdr;
@@ -73,7 +98,7 @@ uint64_t SYSC_FPGA_hndl::waitConfig()
 }
 
 
-int SYSC_FPGA_hndl::setConfig(Accel_Payload* pyld)
+int SYSC_FPGA_hndl::wrConfig(Accel_Payload* pyld)
 {
 	msgHeader_t hdr;
 	hdr.msgType = ACCEL_BGN_CFG;
@@ -84,7 +109,7 @@ int SYSC_FPGA_hndl::setConfig(Accel_Payload* pyld)
     hdr.msgType = ACCEL_CFG_PYLD;
     int remBytes = pyld->m_size;
     int pyldIdx = 0;
-    uint8_t* pyld_ptr = (uint8_t*)pyld->m_address;
+    uint8_t* pyld_ptr = (uint8_t*)pyld->m_buffer;
 	hdr.pyld = true;
     do
     {
@@ -131,7 +156,7 @@ uint64_t SYSC_FPGA_hndl::waitParam()
 }
 
 
-int SYSC_FPGA_hndl::setParam(Accel_Payload* pyld)
+int SYSC_FPGA_hndl::wrParam(Accel_Payload* pyld)
 {
 	msgHeader_t hdr;
 	hdr.msgType = ACCEL_BGN_PARAM;
@@ -142,7 +167,7 @@ int SYSC_FPGA_hndl::setParam(Accel_Payload* pyld)
     hdr.msgType = ACCEL_PARAM_PYLD;
     int remBytes = pyld->m_size;
     int pyldIdx = 0;
-    uint8_t* pyld_ptr = (uint8_t*)pyld->m_address;
+    uint8_t* pyld_ptr = (uint8_t*)pyld->m_buffer;
 	hdr.pyld = true;
     do
     {
@@ -221,7 +246,7 @@ int SYSC_FPGA_hndl::getOutput(Accel_Payload* pyld)
 	hdr.msgType = NULL_MSG;
 	hdr.length = pyld->m_size;
 	hdr.pyld = true;
-	wait_message(m_socket, &hdr, (uint8_t*)pyld->m_address, ACCEL_OUTPUT_PYLD);
+	wait_message(m_socket, &hdr, (uint8_t*)pyld->m_buffer, ACCEL_OUTPUT_PYLD);
 	cout << "Software recvd ACCEL_OUTPUT_PYLD" << endl;
 
 	hdr.msgType = NULL_MSG;
@@ -245,7 +270,7 @@ int SYSC_FPGA_hndl::sendOutput(Accel_Payload* pyld)
 	hdr.msgType = ACCEL_OUTPUT_PYLD;
 	hdr.length = pyld->m_size;
 	hdr.pyld = true;
-	send_message(m_socket, &hdr, (uint8_t*)pyld->m_address);
+	send_message(m_socket, &hdr, (uint8_t*)pyld->m_buffer);
 	cout << "Hardware sent ACCEL_OUTPUT_PYLD" << endl;
 
 	hdr.msgType = ACCEL_END_OUTPUT;
