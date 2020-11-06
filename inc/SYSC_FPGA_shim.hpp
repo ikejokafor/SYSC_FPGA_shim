@@ -18,11 +18,12 @@ class SYSC_FPGA_hndl : public FPGA_hndl
         SYSC_FPGA_hndl(int memStartOft = 0);
         ~SYSC_FPGA_hndl();
         int hardware_init();
-        int software_init();
+        int software_init(soft_init_param* param);
         uint64_t allocate(Accel_Payload* pyld, int size);
         void deallocate(Accel_Payload* pyld);
         uint64_t waitConfig();
         int wrConfig(Accel_Payload* pyld);
+        int rdConfig(Accel_Payload* pyld);
         uint64_t waitParam();
         int wrParam(Accel_Payload* pyld);
         int waitStart();

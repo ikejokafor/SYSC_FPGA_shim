@@ -30,7 +30,7 @@ int SYSC_FPGA_hndl::hardware_init()
 }
 
 
-int SYSC_FPGA_hndl::software_init()
+int SYSC_FPGA_hndl::software_init(soft_init_param* param)
 {
 	if((m_socket = client_connect()) == -1)
 	{
@@ -125,6 +125,12 @@ int SYSC_FPGA_hndl::wrConfig(Accel_Payload* pyld)
 	send_message(m_socket, &hdr, nullptr);
 	cout << "Software sent ACCEL_END_CFG" << endl;
 	return 0;
+}
+
+
+int SYSC_FPGA_hndl::rdConfig(Accel_Payload* pyld)
+{
+    return 0;
 }
 
 
