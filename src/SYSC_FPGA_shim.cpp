@@ -77,7 +77,7 @@ uint64_t SYSC_FPGA_hndl::waitConfig()
 	hdr.msgType = NULL_MSG;
 	hdr.pyld = false;
 	wait_message(m_socket, &hdr, nullptr, ACCEL_BGN_CFG);
-	cout << "Hardware recvd ACCEL_SET_CONFIG" << endl;
+	cout << "Hardware recvd ACCEL_BGN_CONFIG" << endl;
     hdr.msgType = ACCEL_CFG_PYLD;
     int remBytes = hdr.length;
     int bufIdx = 0;
@@ -134,13 +134,18 @@ int SYSC_FPGA_hndl::rdConfig(Accel_Payload* pyld)
 }
 
 
-uint64_t SYSC_FPGA_hndl::waitParam()
+void SYSC_FPGA_hndl::waitParam(int& addr, int& size)
 {
+	SYSC_FPGA_shim_pyld* pyld = new SYSC_FPGA_shim_pyld();
 	msgHeader_t hdr;
 	hdr.msgType = NULL_MSG;
 	hdr.pyld = false;
 	wait_message(m_socket, &hdr, nullptr, ACCEL_BGN_PARAM);
-	cout << "Hardware recvd ACCEL_SET_PARAM" << endl;
+	cout << "Hardware recvd ACCEL_BGN_PARAM" << endl;
+    if(hdr.length == 0)
+    {
+        return;
+    }
     hdr.msgType = ACCEL_PARAM_PYLD;
     int remBytes = hdr.length;
     int bufIdx = 0;
@@ -158,7 +163,8 @@ uint64_t SYSC_FPGA_hndl::waitParam()
 	hdr.pyld = false;
 	wait_message(m_socket, &hdr, nullptr, ACCEL_END_PARAM);
 	cout << "Hardware recvd ACCEL_END_PARAM" << endl;
-    return (uint64_t)buf;
+	addr = (uint64_t)buf;
+	size = hdr.length;
 }
 
 
@@ -169,7 +175,11 @@ int SYSC_FPGA_hndl::wrParam(Accel_Payload* pyld)
 	hdr.length = pyld->m_size;
 	hdr.pyld = false;
 	send_message(m_socket, &hdr, nullptr);
-	cout << "Software sent ACCEL_SET_PARAM" << endl;
+	cout << "Software sent ACCEL_BGN_PARAM" << endl;
+    if(pyld->m_size == 0)
+    {
+        return 0;
+    }
     hdr.msgType = ACCEL_PARAM_PYLD;
     int remBytes = pyld->m_size;
     int pyldIdx = 0;

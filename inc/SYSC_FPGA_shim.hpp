@@ -12,6 +12,16 @@
 #define ALGN_PYLD_SZ(sz, algn)                      (ceil(sz / algn) * algn)
 
 
+class SYSC_FPGA_shim_pyld : public Accel_Payload
+{
+    public:
+        SYSC_FPGA_shim_pyld() { }
+        ~SYSC_FPGA_shim_pyld() { }
+		void serialize() { }
+        void deserialize() { }
+};
+
+
 class SYSC_FPGA_hndl : public FPGA_hndl
 {
     public:
@@ -24,7 +34,7 @@ class SYSC_FPGA_hndl : public FPGA_hndl
         uint64_t waitConfig();
         int wrConfig(Accel_Payload* pyld);
         int rdConfig(Accel_Payload* pyld);
-        uint64_t waitParam();
+        void waitParam(int& addr, int& size);
         int wrParam(Accel_Payload* pyld);
         int waitStart();
         int sendStart();
