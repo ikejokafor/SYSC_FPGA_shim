@@ -34,7 +34,7 @@ class SYSC_FPGA_hndl : public FPGA_hndl
         uint64_t waitConfig();
         int wrConfig(Accel_Payload* pyld);
         int rdConfig(Accel_Payload* pyld);
-        void waitParam(int& addr, int& size);
+        void waitParam(uint64_t& addr, int& size);
         int wrParam(Accel_Payload* pyld);
         int waitStart();
         int sendStart();
