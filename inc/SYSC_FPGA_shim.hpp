@@ -2,14 +2,14 @@
 
 
 #include "FPGA_shim.hpp"
-#include "myNetProto.hpp"
+#include "syscNetProto.hpp"
 #include <cmath>
 
 
 #define DMA_BUFFER_ALIGNMENT                        64
 #define my_aligned_malloc(pp, alignment, size)      posix_memalign(pp, alignment, size)
 #define my_aligned_free(p)                          free(p)
-#define ALGN_PYLD_SZ(sz, algn)                      (ceil(sz / algn) * algn)
+#define ALGN_PYLD_SZ(sz, algn)                      ((uint64_t)(ceil((float)sz / (float)algn) * (float)algn))
 
 
 class SYSC_FPGA_shim_pyld : public Accel_Payload
@@ -29,8 +29,10 @@ class SYSC_FPGA_hndl : public FPGA_hndl
         ~SYSC_FPGA_hndl();
         int hardware_init();
         int software_init(soft_init_param* param);
-        uint64_t allocate(Accel_Payload* pyld, int size);
+        uint64_t allocate(Accel_Payload* pyld, uint64_t size);
         void deallocate(Accel_Payload* pyld);
+        uint64_t wait_sysC_FPGAconfig();        
+        int wr_sysC_FPGAconfig(Accel_Payload* pyld);
         uint64_t waitConfig();
         int wrConfig(Accel_Payload* pyld);
         int rdConfig(Accel_Payload* pyld);

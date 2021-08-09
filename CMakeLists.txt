@@ -142,7 +142,7 @@ SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES
 # BEGIN Build dependencies --------------------------------------------------------------------------------------------------------------------------
 # ${TARGET_NAME} depends on [<target-dependency>]
 ADD_DEPENDENCIES(${TARGET_NAME} network)
-ADD_DEPENDENCIES(${TARGET_NAME} myNetProto)
+ADD_DEPENDENCIES(${TARGET_NAME} syscNetProto)
 # END Build dependencies ----------------------------------------------------------------------------------------------------------------------------
 
 
@@ -170,7 +170,7 @@ ELSE()
         /usr/include/
         ${PROJECT_SOURCE_DIR}/inc/
 	    ${PROJECT_SOURCE_DIR}/../FPGA_shim/inc/
-        ${PROJECT_SOURCE_DIR}/../myNetProto/inc/
+        ${PROJECT_SOURCE_DIR}/../syscNetProto/inc/
         ${PROJECT_SOURCE_DIR}/../network/inc/
         #<include_path0>
         #<include_path1>
