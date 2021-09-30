@@ -10,7 +10,7 @@ SYSC_FPGA_hndl::SYSC_FPGA_hndl(int memStartOft) : FPGA_hndl()
 
 SYSC_FPGA_hndl::~SYSC_FPGA_hndl()
 {
-
+    close(m_socket);
 }
 
 
