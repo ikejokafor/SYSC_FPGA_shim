@@ -7,6 +7,7 @@
 
 
 #define DMA_BUFFER_ALIGNMENT                        64
+#define AXI_BUFFER_ALIGNMENT                        64
 #define my_aligned_malloc(pp, alignment, size)      posix_memalign(pp, alignment, size)
 #define my_aligned_free(p)                          free(p)
 #define ALGN_PYLD_SZ(sz, algn)                      ((uint64_t)(ceil((float)sz / (float)algn) * (float)algn))

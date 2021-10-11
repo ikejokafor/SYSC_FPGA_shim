@@ -10,12 +10,18 @@ SYSC_FPGA_hndl::SYSC_FPGA_hndl(int memStartOft) : FPGA_hndl()
 
 SYSC_FPGA_hndl::~SYSC_FPGA_hndl()
 {
+#ifdef MODEL_TECH
+    return;
+#endif
     close(m_socket);
 }
 
 
 int SYSC_FPGA_hndl::hardware_init()
 {
+#ifdef MODEL_TECH
+    return 0;
+#endif
     if((m_socket = client_connect()) == -1)
     {
         return -1;
@@ -32,10 +38,14 @@ int SYSC_FPGA_hndl::hardware_init()
 
 int SYSC_FPGA_hndl::software_init(soft_init_param* param)
 {
+#ifdef MODEL_TECH
+    return 0;
+#endif
     if((m_socket = client_connect()) == -1)
     {
         return -1;
     }
+
     msgHeader_t hdr;
     hdr.msgType = CONNECT_SOFTWARE;
 	hdr.pyld = false;
@@ -48,16 +58,16 @@ int SYSC_FPGA_hndl::software_init(soft_init_param* param)
 
 uint64_t SYSC_FPGA_hndl::allocate(Accel_Payload* pyld, uint64_t size)
 {
-    uint64_t aligned_sz = ALGN_PYLD_SZ(size, DMA_BUFFER_ALIGNMENT);
-    if(my_aligned_malloc((void**)&pyld->m_buffer, DMA_BUFFER_ALIGNMENT, aligned_sz))
+    uint64_t AXI_aligned_sz = ALGN_PYLD_SZ(size, AXI_BUFFER_ALIGNMENT);
+    if(my_aligned_malloc((void**)&pyld->m_buffer, AXI_BUFFER_ALIGNMENT, AXI_aligned_sz))
     {
         printf("[SYSC_FPGA_SHIM]: Failed to allocate 0x%X B for DMA buffer.", size);
         return -1;
     }
-    printf("[SYSC_FPGA_SHIM]: Allocated %llud bytes buffer space on Remote Memory\n", aligned_sz);
-    pyld->m_size            = aligned_sz;
+    printf("[SYSC_FPGA_SHIM]: Allocated %llud bytes buffer space on Remote Memory\n", AXI_aligned_sz);
+    pyld->m_size            = AXI_aligned_sz;
     pyld->m_remAddress      = (uint64_t)m_remAddrOfst;
-    m_remAddrOfst           += aligned_sz;
+    m_remAddrOfst           += AXI_aligned_sz;
     return                  (uint64_t)pyld->m_buffer;
 }
 
@@ -79,6 +89,12 @@ uint64_t SYSC_FPGA_hndl::wait_sysC_FPGAconfig()
 	hdr.length = 0;
     wait_message(m_socket, &hdr, nullptr, ACCL_SYSC_FPGA_BGN_CFG);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_SYSC_FPGA_BGN_CFG" << endl;
+    // Send ACK
+	hdr.pyld = false;
+	hdr.length = 0;
+    hdr.msgType = ACCL_ACK;
+    send_message(m_socket, &hdr, nullptr);
+    cout << "[SYSC_FPGA_SHIM]: Hardware sent ACK" << endl;
 	// Wait for ACCL_CFG_PYLD(s)
     hdr.msgType = ACCL_CFG_PYLD;
 	hdr.pyld = true;
@@ -92,12 +108,24 @@ uint64_t SYSC_FPGA_hndl::wait_sysC_FPGAconfig()
         bufIdx += rb;
         remBytes -= rb;
 		cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_CFG_PYLD - " << bufIdx << "/" << totalBytes << " bytes" << endl;
+        // Send ACK
+        hdr.pyld = false;
+        hdr.length = 0;
+        hdr.msgType = ACCL_ACK;
+        send_message(m_socket, &hdr, nullptr);
+        cout << "[SYSC_FPGA_SHIM]: Hardware sent ACK" << endl;
     } while(remBytes > 0);
     // Wait for ACCL_SYSC_FPGA_END_CFG
 	hdr.pyld = false;
 	hdr.length = 0;
     wait_message(m_socket, &hdr, nullptr, ACCL_SYSC_FPGA_END_CFG);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_SYSC_FPGA_END_CFG" << endl;
+    // Send ACK
+	hdr.pyld = false;
+	hdr.length = 0;
+    hdr.msgType = ACCL_ACK;
+    send_message(m_socket, &hdr, nullptr);
+    cout << "[SYSC_FPGA_SHIM]: Hardware sent ACK" << endl;
     return (uint64_t)buf;    
 }
 
@@ -111,6 +139,11 @@ int SYSC_FPGA_hndl::wr_sysC_FPGAconfig(Accel_Payload* pyld)
 	hdr.length = pyld->m_size;
 	send_message(m_socket, &hdr, nullptr);
     cout << "[SYSC_FPGA_SHIM]: Software sent ACCL_SYSC_FPGA_BGN_CFG" << endl;
+    // Wait ACK
+	hdr.pyld = false;
+	hdr.length = 0;
+    wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
 	// Send ACCL_CFG_PYLD(s)
     hdr.msgType = ACCL_CFG_PYLD;
 	hdr.pyld = true;
@@ -125,6 +158,11 @@ int SYSC_FPGA_hndl::wr_sysC_FPGAconfig(Accel_Payload* pyld)
         pyldIdx += rb;
         remBytes -= rb;
 		cout << "[SYSC_FPGA_SHIM]: Software sent ACCL_CFG_PYLD - " << pyldIdx << "/" << totalBytes << " bytes" << endl;
+        // Wait ACK
+        hdr.pyld = false;
+        hdr.length = 0;
+        wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
+        cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
     } while(remBytes > 0);
 	// Send ACCL_SYSC_FPGA_END_CFG
 	hdr.msgType = ACCL_SYSC_FPGA_END_CFG;
@@ -132,6 +170,11 @@ int SYSC_FPGA_hndl::wr_sysC_FPGAconfig(Accel_Payload* pyld)
 	hdr.length = 0;
 	send_message(m_socket, &hdr, nullptr);
 	cout << "[SYSC_FPGA_SHIM]: Software sent ACCL_SYSC_FPGA_END_CFG" << endl;
+    // Wait ACK
+    hdr.pyld = false;
+    hdr.length = 0;
+    wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
 	return 0;    
 }
 
