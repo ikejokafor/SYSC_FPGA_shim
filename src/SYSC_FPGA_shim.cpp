@@ -45,7 +45,6 @@ int SYSC_FPGA_hndl::software_init(soft_init_param* param)
     {
         return -1;
     }
-
     msgHeader_t hdr;
     hdr.msgType = CONNECT_SOFTWARE;
     hdr.pyld = false;
@@ -87,6 +86,7 @@ uint64_t SYSC_FPGA_hndl::wait_sysC_FPGAconfig()
     msgHeader_t hdr;
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_SYSC_FPGA_BGN_CFG" << endl;    
     wait_message(m_socket, &hdr, nullptr, ACCL_SYSC_FPGA_BGN_CFG);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_SYSC_FPGA_BGN_CFG" << endl;
     int totalBytes = hdr.length;    
@@ -104,6 +104,7 @@ uint64_t SYSC_FPGA_hndl::wait_sysC_FPGAconfig()
     uint8_t* buf = new uint8_t[totalBytes];
     do
     {
+        cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_PYLD" << endl;
         int rb = wait_message(m_socket, &hdr, &buf[bufIdx], ACCL_PYLD);
         bufIdx += rb;
         remBytes -= rb;
@@ -118,6 +119,7 @@ uint64_t SYSC_FPGA_hndl::wait_sysC_FPGAconfig()
     // Wait for ACCL_SYSC_FPGA_END_CFG
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_SYSC_FPGA_END_CFG" << endl;    
     wait_message(m_socket, &hdr, nullptr, ACCL_SYSC_FPGA_END_CFG);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_SYSC_FPGA_END_CFG" << endl;
     // Send ACK
@@ -142,8 +144,9 @@ int SYSC_FPGA_hndl::wr_sysC_FPGAconfig(Accel_Payload* pyld)
     // Wait ACK
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;    
     wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
-    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
+    cout << "[SYSC_FPGA_SHIM]: Software recvd ACK" << endl;
     // Send ACCL_PYLD(s)
     hdr.msgType = ACCL_PYLD;
     hdr.pyld = true;
@@ -161,8 +164,9 @@ int SYSC_FPGA_hndl::wr_sysC_FPGAconfig(Accel_Payload* pyld)
         // Wait ACK
         hdr.pyld = false;
         hdr.length = 0;
-        wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
         cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
+        wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
+        cout << "[SYSC_FPGA_SHIM]: Software recvd ACK" << endl;
     } while(remBytes > 0);
     // Send ACCL_SYSC_FPGA_END_CFG
     hdr.msgType = ACCL_SYSC_FPGA_END_CFG;
@@ -173,8 +177,9 @@ int SYSC_FPGA_hndl::wr_sysC_FPGAconfig(Accel_Payload* pyld)
     // Wait ACK
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;   
     wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
-    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
+    cout << "[SYSC_FPGA_SHIM]: Software recvd ACK" << endl;
     return 0;    
 }
 
@@ -184,6 +189,7 @@ uint64_t SYSC_FPGA_hndl::waitConfig()
     msgHeader_t hdr;
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_BGN_CFG" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_BGN_CFG);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_BGN_CFG" << endl;
     int totalBytes = hdr.length;
@@ -201,6 +207,7 @@ uint64_t SYSC_FPGA_hndl::waitConfig()
     uint8_t* buf = new uint8_t[totalBytes];
     do
     {
+        cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_PYLD" << endl;
         int rb = wait_message(m_socket, &hdr, &buf[bufIdx], ACCL_PYLD);
         bufIdx += rb;
         remBytes -= rb;
@@ -215,6 +222,7 @@ uint64_t SYSC_FPGA_hndl::waitConfig()
     // Wait for ACCL_END_CFG
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_END_CFG" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_END_CFG);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_END_CFG" << endl;
     // Send ACK
@@ -239,8 +247,9 @@ int SYSC_FPGA_hndl::wrConfig(Accel_Payload* pyld)
     // Wait ACK
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
-    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;    
+    cout << "[SYSC_FPGA_SHIM]: Software recvd ACK" << endl;    
     // Send ACCL_PYLD(s)
     hdr.msgType = ACCL_PYLD;
     hdr.pyld = true;
@@ -258,8 +267,9 @@ int SYSC_FPGA_hndl::wrConfig(Accel_Payload* pyld)
          // Wait ACK
         hdr.pyld = false;
         hdr.length = 0;
+        cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;        
         wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
-        cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;       
+        cout << "[SYSC_FPGA_SHIM]: Software recvd ACK" << endl;       
     } while(remBytes > 0);
     // Send ACCL_END_CFG
     hdr.msgType = ACCL_END_CFG;
@@ -270,8 +280,9 @@ int SYSC_FPGA_hndl::wrConfig(Accel_Payload* pyld)
     // Wait ACK
     hdr.pyld = false;
     hdr.length = 0;
-    wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
     cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;    
+    wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
+    cout << "[SYSC_FPGA_SHIM]: Software recvd ACK" << endl;  
     return 0;
 }
 
@@ -400,8 +411,9 @@ int SYSC_FPGA_hndl::sendStart()
     // Wait ACK
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
-    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;    
+    cout << "[SYSC_FPGA_SHIM]: Software recvd ACK" << endl;    
     return 0;
 }
 
@@ -411,6 +423,7 @@ int SYSC_FPGA_hndl::waitComplete()
     msgHeader_t hdr;
     hdr.length = 0;
     hdr.pyld = false;
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACCL_COMPLETE" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_COMPLETE);
     cout << "[SYSC_FPGA_SHIM]: Software recvd ACCL_COMPLETE" << endl;
     return 0;
@@ -441,8 +454,9 @@ int SYSC_FPGA_hndl::getOutput(Accel_Payload* pyld)
     // Wait ACK
     hdr.pyld = false;
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl; 
     wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
-    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACK" << endl;    
+    cout << "[SYSC_FPGA_SHIM]: Software recvd for ACK" << endl;    
     // Wait for ACCL_PYLD(s)
     int totalBytes = pyld->m_size;
     int remBytes = pyld->m_size;
@@ -452,10 +466,11 @@ int SYSC_FPGA_hndl::getOutput(Accel_Payload* pyld)
     do
     {
         hdr.length = min(remBytes, MAX_BLK_SZ);
+        cout << "[SYSC_FPGA_SHIM]: Software waiting for ACCL_PYLD - " << pyldIdx << "/" << totalBytes << " bytes" << endl;
         int rb = wait_message(m_socket, &hdr, &pyld_ptr[pyldIdx], ACCL_PYLD);
-        cout << "[SYSC_FPGA_SHIM]: Software recvd ACCL_PYLD - " << pyldIdx << "/" << totalBytes << " bytes" << endl;
         pyldIdx += rb;
-        remBytes -= rb;
+        remBytes -= rb;       
+        cout << "[SYSC_FPGA_SHIM]: Software recvd ACCL_PYLD - " << pyldIdx << "/" << totalBytes << " bytes" << endl;
         // Send ACK
         hdr.pyld = false;
         hdr.length = 0;
@@ -466,6 +481,7 @@ int SYSC_FPGA_hndl::getOutput(Accel_Payload* pyld)
     // Wait for ACCL_END_OUTPUT
     hdr.pyld = false;    
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Software waiting for ACCL_END_OUTPUT" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_END_OUTPUT);
     cout << "[SYSC_FPGA_SHIM]: Software recvd ACCL_END_OUTPUT" << endl;
     // Send ACK
@@ -484,6 +500,7 @@ int SYSC_FPGA_hndl::sendOutput(Accel_Payload* pyld)
     msgHeader_t hdr;
     hdr.pyld = false;    
     hdr.length = 0;
+    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_BGN_OUTPUT" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_BGN_OUTPUT);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_BGN_OUTPUT" << endl;
     // Send ACK
@@ -503,14 +520,15 @@ int SYSC_FPGA_hndl::sendOutput(Accel_Payload* pyld)
     {
         hdr.length = min(remBytes, MAX_BLK_SZ);
         int rb = send_message(m_socket, &hdr, &pyld_ptr[pyldIdx]);
-        cout << "[SYSC_FPGA_SHIM]: Hardware sent ACCL_PYLD - " << pyldIdx << "/" << totalBytes << " bytes" << endl;
         pyldIdx += rb;
         remBytes -= rb;
+        cout << "[SYSC_FPGA_SHIM]: Hardware sent ACCL_PYLD - " << pyldIdx << "/" << totalBytes << " bytes" << endl;        
         // Wait ACK
         hdr.pyld = false;
         hdr.length = 0;
-        wait_message(m_socket, &hdr, nullptr, SOFT_ACK);
         cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACK" << endl;
+        wait_message(m_socket, &hdr, nullptr, SOFT_ACK);
+        cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACK" << endl;
     } while(remBytes > 0);
     // Send ACCL_END_OUTPUT
     hdr.msgType = ACCL_END_OUTPUT;
@@ -521,7 +539,8 @@ int SYSC_FPGA_hndl::sendOutput(Accel_Payload* pyld)
     // Wait ACK
     hdr.pyld = false;
     hdr.length = 0;
-    wait_message(m_socket, &hdr, nullptr, ACCL_ACK);
-    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACK" << endl;     
+    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACK" << endl;
+    wait_message(m_socket, &hdr, nullptr, SOFT_ACK);
+    cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACK" << endl;    
     return 0;
 }
