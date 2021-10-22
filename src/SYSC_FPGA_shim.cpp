@@ -2,7 +2,7 @@
 using namespace std;
 
 
-SYSC_FPGA_hndl::SYSC_FPGA_hndl(int memStartOft) : FPGA_hndl()
+SYSC_FPGA_hndl::SYSC_FPGA_hndl(uint64_t memStartOft) : FPGA_hndl()
 {
     m_remAddrOfst = memStartOft;
 }
@@ -388,6 +388,7 @@ int SYSC_FPGA_hndl::waitStart()
     msgHeader_t hdr;
     hdr.length = 0;
     hdr.pyld = false;
+    cout << "[SYSC_FPGA_SHIM]: Hardware waiting for ACCL_START" << endl;
     wait_message(m_socket, &hdr, nullptr, ACCL_START);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACCL_START" << endl;
     // Send ACK

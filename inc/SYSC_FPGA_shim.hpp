@@ -26,7 +26,7 @@ class SYSC_FPGA_shim_pyld : public Accel_Payload
 class SYSC_FPGA_hndl : public FPGA_hndl
 {
     public:
-        SYSC_FPGA_hndl(int memStartOft = 0);
+        SYSC_FPGA_hndl(uint64_t memStartOft = 0);
         ~SYSC_FPGA_hndl();
         int hardware_init();
         int software_init(soft_init_param* param);
