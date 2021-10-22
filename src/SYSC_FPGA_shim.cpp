@@ -4,6 +4,7 @@ using namespace std;
 
 SYSC_FPGA_hndl::SYSC_FPGA_hndl(uint64_t memStartOft) : FPGA_hndl()
 {
+    m_memStartOft = memStartOft;
     m_remAddrOfst = memStartOft;
 }
 
@@ -544,4 +545,10 @@ int SYSC_FPGA_hndl::sendOutput(Accel_Payload* pyld)
     wait_message(m_socket, &hdr, nullptr, SOFT_ACK);
     cout << "[SYSC_FPGA_SHIM]: Hardware recvd ACK" << endl;    
     return 0;
+}
+
+
+void SYSC_FPGA_hndl::resetMemSpace()
+{
+    m_remAddrOfst = m_memStartOft;
 }

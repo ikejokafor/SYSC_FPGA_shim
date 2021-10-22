@@ -45,6 +45,7 @@ class SYSC_FPGA_hndl : public FPGA_hndl
         int sendComplete();
         int getOutput(Accel_Payload* pyld);
         int sendOutput(Accel_Payload* pyld);
+        void resetMemSpace();
 
         int m_socket;
 };
