@@ -40,12 +40,12 @@ class SYSC_FPGA_hndl : public FPGA_hndl
         void waitParam(uint64_t& addr, int& size);
         int wrParam(Accel_Payload* pyld);
         int waitStart();
-        int sendStart();
+        int sendStart(Accel_Payload* pyld);
         int waitComplete();
         int sendComplete();
         int getOutput(Accel_Payload* pyld);
         int sendOutput(Accel_Payload* pyld);
-        void resetMemSpace();
+        int resetMemSpace();
 
         int m_socket;
 };

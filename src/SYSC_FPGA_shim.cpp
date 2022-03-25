@@ -402,7 +402,7 @@ int SYSC_FPGA_hndl::waitStart()
 }
 
 
-int SYSC_FPGA_hndl::sendStart()
+int SYSC_FPGA_hndl::sendStart(Accel_Payload* pyld)
 {
     msgHeader_t hdr;
     hdr.msgType = ACCL_START;
@@ -548,7 +548,8 @@ int SYSC_FPGA_hndl::sendOutput(Accel_Payload* pyld)
 }
 
 
-void SYSC_FPGA_hndl::resetMemSpace()
+int SYSC_FPGA_hndl::resetMemSpace()
 {
     m_remAddrOfst = m_memStartOft;
+    return 0;
 }
