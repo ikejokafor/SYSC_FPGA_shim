@@ -1,3 +1,7 @@
 # SystemC FPGA shim
 
-shim layer implementing abstract functionality for host device interfacing with SystemC simulation
+Shim layer implementing abstract functionality for host device interfacing with SystemC simulation
+
+## Dependencies:
+
+FPGA_shim
